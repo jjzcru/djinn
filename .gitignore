@@ -17,3 +17,6 @@
 # Database
 db/
 *.sqlite
+
+# Nova
+.nova
