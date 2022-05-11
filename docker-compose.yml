@@ -1,9 +1,18 @@
-version: "3"
+version: "3.5"
 
 services:
-  sqlite3:
-    image: nouchka/sqlite3:latest
-    stdin_open: true
-    tty: true
-    volumes:
-      - ./db/:/root/db/
+  # https://docs.nats.io/running-a-nats-service/nats_docker
+  nats:
+    image: "nats:2.8.1-alpine3.15"
+    expose:
+      - "4222"
+      - "6222"
+      - "8222"
+    ports:
+      - "8222:8222"
+      - "6222:6222"
+      - "4222:4222"
+    networks: ["nats"]
+networks:
+  nats:
+    name: nats
