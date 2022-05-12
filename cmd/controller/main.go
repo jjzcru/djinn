@@ -22,10 +22,6 @@ func main() {
 	for k := range plugins {
 		fmt.Printf("Plugin '%s' loaded successfully\n", k)
 	}
-
-	deviceId := "d073d568f92a"
-	plugins["com.lifx.bulbs"].Command(deviceId, "SET_COLOR", `{"color": "#00FF00"}`)
-	// plugins["com.lifx.bulbs"].Command(deviceId, "SET_BRIGHTNESS", `{"brightness": 1.0}`)
 	
 	ctrl.OnRun()
 }

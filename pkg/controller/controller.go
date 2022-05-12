@@ -2,12 +2,14 @@ package controller
 
 import (
 	"fmt"
-	
+	"log"
+
 	"io/ioutil"
 	"os"
-	"log"
 	"path/filepath"
 	"sync"
+
+	"encoding/json"
 
 	"github.com/jjzcru/djinn/plugin"
 	nats "github.com/nats-io/nats.go"
@@ -15,6 +17,7 @@ import (
 
 type Controller struct {
 	Plugins map[string]plugin.Plugin
+	queue queue
 }
 
 func (c *Controller) OnRun() error {
@@ -26,7 +29,9 @@ func (c *Controller) OnRun() error {
 		return err
 	}
 	
-	go forever(q)
+	c.queue = q
+	
+	go c.run()
 
 	wg.Wait()
 	q.nc.Close()
@@ -34,12 +39,29 @@ func (c *Controller) OnRun() error {
 	return nil
 }
 
-func forever(q queue) {
+func (c *Controller) run() {
 	fmt.Println("I'm in the forever loop")
-	_, err := q.nc.Subscribe("updates", func(m *nats.Msg) {})
-	if err != nil {
+	c.queue.nc.Subscribe("command", c.onReceiveCommand)
+}
+
+func (c *Controller) onReceiveCommand(m *nats.Msg) {
+	fmt.Printf("Received a message: %s\n", string(m.Data))
+	command := Command{}
+	if err := json.Unmarshal(m.Data, &command); err != nil {
+		fmt.Println("I screw up")
 		log.Fatal(err)
+		return
 	}
+	
+	fmt.Printf("\nId: %s", command.Id);
+	fmt.Printf("\nPlugin: %s", command.Plugin);
+	fmt.Printf("\nCommand: %s", command.Command);
+	fmt.Printf("\nPayload: %s", command.Payload);
+	
+	if plugin, ok := c.Plugins[command.Plugin]; ok {
+		plugin.Command(command.Id, command.Command, command.Payload)
+	}
+	
 }
 
 func (c *Controller) OnLoadPlugins() error {

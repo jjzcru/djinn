@@ -1,9 +1,0 @@
-{
-  "actions" : {
-    "run" : {
-      "enabled" : true,
-      "script" : "cd cmd\/plugins\/nanoleaf\ngo run main.go"
-    }
-  },
-  "openLogOnRun" : "start"
-}

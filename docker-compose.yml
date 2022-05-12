@@ -1,18 +1,29 @@
 version: "3.5"
 
 services:
-  # https://docs.nats.io/running-a-nats-service/nats_docker
   nats:
     image: "nats:2.8.1-alpine3.15"
     expose:
       - "4222"
-      - "6222"
-      - "8222"
     ports:
-      - "8222:8222"
-      - "6222:6222"
       - "4222:4222"
     networks: ["nats"]
+  controller:
+    container_name: djinn-controller
+    image: djinn/controller:1.0
+    build:
+      dockerfile: ./docker/controller/Dockerfile
+      context: .
+    volumes:
+      - /Users/jjzcru/Workspace/Djinn/plugins:/app/plugins
+      - ./docker/controller/controller:/app/controller
+    links:
+      - nats
+    environment:
+      NATS_URI: "nats://nats:4222"
+    depends_on:
+      - nats
+
 networks:
   nats:
     name: nats
